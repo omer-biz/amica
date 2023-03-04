@@ -1,0 +1,10 @@
+[package]
+name = "amica"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hyper = { version = "0.14.24", features = ["client", "http1", "http2", "tcp", "server"] }
+tokio = { version = "1.26.0", features = ["tokio-macros", "rt-multi-thread", "macros"] }
