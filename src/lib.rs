@@ -96,13 +96,38 @@ impl Into<Request<Body>> for ProxyRequest {
     }
 }
 
-impl UserData for ProxyRequest {}
+impl UserData for ProxyRequest {
+    fn add_methods<'lua, T: rlua::UserDataMethods<'lua, Self>>(methods: &mut T) {
+        methods.add_method("uri", |_, req, ()| Ok(req.uri.to_string()));
+        methods.add_method("method", |_, req, ()| Ok(req.method.to_string()));
+        methods.add_method("body", |_, req, ()| Ok(req.body.to_string()));
+        methods.add_method("headers", |_, req, ()| Ok(req.headers.clone()));
+
+        methods.add_method_mut("set_uri", |_, req, (uri,)| {
+            req.uri = uri;
+            Ok(())
+        });
+        methods.add_method_mut("set_method", |_, req, (method,)| {
+            req.method = method;
+            Ok(())
+        });
+        methods.add_method_mut("set_body", |_, req, (body,)| {
+            req.body = body;
+            Ok(())
+        });
+        methods.add_method_mut("set_headers", |_, req, (headers,)| {
+            req.headers = headers;
+            Ok(())
+        });
+    }
+}
 
 async fn handle_http_request(request: Request<Body>) -> Result<Response<Body>, String> {
     let lua_req_filter = r#"
     function on_http_request(req)
-        print("request: ", req)
-
+        print("request: ", req:uri())
+        req:set_uri("http://www.duckduckgo.com")
+        print("request: ", req:uri())
         return req
     end
     "#;
