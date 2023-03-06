@@ -1,4 +1,7 @@
-use hyper::{server::conn::Http, service::service_fn, Body, Request, Response};
+use std::collections::HashMap;
+
+use hyper::{body::to_bytes, server::conn::Http, service::service_fn, Body, Request, Response};
+use rlua::{Function, MultiValue, UserData};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -50,7 +53,78 @@ async fn bidi_read_write(mut stream_one: TcpStream, mut stream_two: TcpStream) {
     }
 }
 
+#[derive(Clone)]
+struct ProxyRequest {
+    uri: String,
+    method: String,
+    headers: HashMap<String, String>,
+    body: String,
+}
+
+impl ProxyRequest {
+    pub async fn new(request: Request<Body>) -> Self {
+        // request.version();
+        let (parts, body) = request.into_parts();
+        let headers: HashMap<String, String> = parts
+            .headers
+            .iter()
+            .map(|header| (header.0.to_string(), header.1.to_str().unwrap().to_string()))
+            .collect();
+        let body = &to_bytes(body).await.unwrap();
+        let body = String::from_utf8_lossy(body);
+
+        ProxyRequest {
+            uri: parts.uri.to_string(),
+            method: parts.method.to_string(),
+            body: body.to_string(),
+            headers,
+        }
+    }
+}
+
+impl Into<Request<Body>> for ProxyRequest {
+    fn into(self) -> Request<Body> {
+        let mut request = Request::builder()
+            .method(self.method.as_str())
+            .uri(self.uri.as_str());
+
+        for (key, value) in self.headers {
+            request = request.header(key.as_str(), value.as_str());
+        }
+
+        request.body(Body::from(self.body)).unwrap()
+    }
+}
+
+impl UserData for ProxyRequest {}
+
 async fn handle_http_request(request: Request<Body>) -> Result<Response<Body>, String> {
+    let lua_req_filter = r#"
+    function on_http_request(req)
+        print("request: ", req)
+
+        return req
+    end
+    "#;
+
+    let lua = rlua::Lua::new();
+    let mut proxy_request = ProxyRequest::new(request).await;
+
+    let request: Request<Body> = lua.context(|lua_context| {
+        let globals = lua_context.globals();
+        let _ = lua_context
+            .load(lua_req_filter)
+            .eval::<MultiValue>()
+            .unwrap();
+
+        let on_http_request: Function = globals.get("on_http_request").unwrap();
+
+        proxy_request = on_http_request
+            .call::<_, ProxyRequest>(proxy_request)
+            .unwrap();
+        proxy_request.into()
+    });
+
     let hyper_client = hyper::Client::new();
     let r = hyper_client.request(request).await.unwrap();
 
