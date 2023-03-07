@@ -69,7 +69,7 @@ async fn handle_http_request(request: Request<Body>) -> Result<Response<Body>, S
     let lua_engine = LuaEngine::new();
     lua_engine.load(lua_req_filter).unwrap();
 
-    let proxy_request = ProxyRequest::new(request).await;
+    let proxy_request = ProxyRequest::from(request).await;
     let request: Request<Body> = lua_engine
         .call_on_http_request(proxy_request)
         .unwrap()

@@ -12,8 +12,7 @@ pub(crate) struct ProxyRequest {
 }
 
 impl ProxyRequest {
-    pub async fn new(request: Request<Body>) -> Self {
-        // request.version();
+    pub async fn from(request: Request<Body>) -> Self {
         let (parts, body) = request.into_parts();
         let headers: HashMap<String, String> = parts
             .headers
