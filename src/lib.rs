@@ -8,7 +8,9 @@ use tokio::{
 };
 
 use lua_engine::LuaEngine;
-use proxy::ProxyRequest;
+use proxy::{ProxyRequest, ProxyResponse};
+
+// struct ProxyHandler;
 
 pub async fn handle_client(mut client: TcpStream) {
     let mut buf = [0; 512];
@@ -60,9 +62,33 @@ async fn handle_http_request(request: Request<Body>) -> Result<Response<Body>, S
     let lua_req_filter = r#"
     function on_http_request(req)
         print("request: ", req:uri())
-        req:set_uri("http://www.duckduckgo.com")
-        print("request: ", req:uri())
+
+
+        for k, v in pairs(req:headers()) do
+           print(k, v)
+        end
+
         return req
+    end
+
+    function on_http_response(res)
+        print("body:", res:body())
+
+        for k, v in pairs(res:headers()) do
+           print(k .. ": " .. v)
+        end
+
+        res:set_body("<h1>This is from the prox</h1>\n"..res:body())
+        headers = res:headers()
+        headers["content-length"] = 63
+        res:set_headers(headers)
+
+        print("")
+        for k, v in pairs(res:headers()) do
+           print(k .. ": " .. v)
+        end
+
+        return res
     end
     "#;
 
@@ -70,13 +96,13 @@ async fn handle_http_request(request: Request<Body>) -> Result<Response<Body>, S
     lua_engine.load(lua_req_filter).unwrap();
 
     let proxy_request = ProxyRequest::from(request).await;
-    let request: Request<Body> = lua_engine
-        .call_on_http_request(proxy_request)
-        .unwrap()
-        .into();
+    let req = lua_engine.call_on_http_request(proxy_request).unwrap();
 
     let hyper_client = hyper::Client::new();
-    let r = hyper_client.request(request).await.unwrap();
+    let response = hyper_client.request(req).await.unwrap();
 
-    Ok::<_, String>(r)
+    let proxy_response = ProxyResponse::from(response).await;
+    let response = lua_engine.call_on_http_response(proxy_response).unwrap();
+
+    Ok::<_, String>(response)
 }
