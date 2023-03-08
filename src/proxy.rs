@@ -68,6 +68,10 @@ impl UserData for ProxyRequest {
             req.headers = headers;
             Ok(())
         });
+        methods.add_method_mut("set_header", |_, req, (key, value)| {
+            let _ = req.headers.insert(key, value);
+            Ok(())
+        });
     }
 }
 
@@ -80,20 +84,24 @@ pub(crate) struct ProxyResponse {
 
 impl UserData for ProxyResponse {
     fn add_methods<'lua, T: rlua::UserDataMethods<'lua, Self>>(methods: &mut T) {
-        methods.add_method("body", |_, req, ()| Ok(req.body.to_string()));
-        methods.add_method("headers", |_, req, ()| Ok(req.headers.clone()));
-        methods.add_method("status", |_, req, ()| Ok(req.status));
+        methods.add_method("body", |_, res, ()| Ok(res.body.to_string()));
+        methods.add_method("headers", |_, res, ()| Ok(res.headers.clone()));
+        methods.add_method("status", |_, res, ()| Ok(res.status));
 
-        methods.add_method_mut("set_body", |_, req, (body,)| {
-            req.body = body;
+        methods.add_method_mut("set_body", |_, res, (body,)| {
+            res.body = body;
             Ok(())
         });
-        methods.add_method_mut("set_headers", |_, req, (headers,)| {
-            req.headers = headers;
+        methods.add_method_mut("set_headers", |_, res, (headers,)| {
+            res.headers = headers;
             Ok(())
         });
-        methods.add_method_mut("set_status", |_, req, (status,)| {
-            req.status = status;
+        methods.add_method_mut("set_status", |_, res, (status,)| {
+            res.status = status;
+            Ok(())
+        });
+        methods.add_method_mut("set_header", |_, res, (key, value)| {
+            let _ = res.headers.insert(key, value);
             Ok(())
         });
     }
