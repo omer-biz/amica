@@ -12,27 +12,31 @@ pub(crate) struct ProxyRequest {
 }
 
 impl ProxyRequest {
-    pub async fn from(request: Request<Body>) -> Self {
+    pub async fn from(request: Request<Body>) -> Result<Self, hyper::Error> {
         let (parts, body) = request.into_parts();
         let headers: HashMap<String, String> = parts
             .headers
             .iter()
-            .map(|header| (header.0.to_string(), header.1.to_str().unwrap().to_string()))
+            .map(|(key, val)| {
+                (
+                    key.to_string(),
+                    String::from_utf8_lossy(val.as_bytes()).to_string(),
+                )
+            })
             .collect();
-        let body = &to_bytes(body).await.unwrap();
+
+        let body = &to_bytes(body).await?;
         let body = String::from_utf8_lossy(body);
 
-        ProxyRequest {
+        Ok(ProxyRequest {
             uri: parts.uri.to_string(),
             method: parts.method.to_string(),
             body: body.to_string(),
             headers,
-        }
+        })
     }
-}
 
-impl Into<Request<Body>> for ProxyRequest {
-    fn into(self) -> Request<Body> {
+    pub fn to_request(self) -> Result<Request<Body>, Box<dyn std::error::Error>> {
         let mut request = Request::builder()
             .method(self.method.as_str())
             .uri(self.uri.as_str());
@@ -41,7 +45,7 @@ impl Into<Request<Body>> for ProxyRequest {
             request = request.header(key.as_str(), value.as_str());
         }
 
-        request.body(Body::from(self.body)).unwrap()
+        Ok(request.body(Body::from(self.body))?)
     }
 }
 
@@ -108,34 +112,37 @@ impl UserData for ProxyResponse {
 }
 
 impl ProxyResponse {
-    pub(crate) async fn from(response: Response<Body>) -> Self {
+    pub(crate) async fn from(response: Response<Body>) -> Result<Self, hyper::Error> {
         let (parts, body) = response.into_parts();
 
         let headers = parts
             .headers
             .iter()
-            .map(|header| (header.0.to_string(), header.1.to_str().unwrap().to_string()))
+            .map(|(key, val)| {
+                (
+                    key.to_string(),
+                    String::from_utf8_lossy(val.as_bytes()).to_string(),
+                )
+            })
             .collect();
 
-        let body = &to_bytes(body).await.unwrap();
+        let body = &to_bytes(body).await?;
         let body = String::from_utf8_lossy(body);
 
-        ProxyResponse {
+        Ok(ProxyResponse {
             status: parts.status.as_u16(),
             body: body.to_string(),
             headers,
-        }
+        })
     }
-}
 
-impl Into<Response<Body>> for ProxyResponse {
-    fn into(self) -> Response<Body> {
-        let mut request = Response::builder().status(self.status);
+    pub fn to_response(self) -> Result<Response<Body>, Box<dyn std::error::Error>> {
+        let mut response = Response::builder().status(self.status);
 
         for (key, value) in self.headers {
-            request = request.header(key.as_str(), value.as_str());
+            response = response.header(key.as_str(), value.as_str());
         }
 
-        request.body(Body::from(self.body)).unwrap()
+        Ok(response.body(Body::from(self.body))?)
     }
 }
