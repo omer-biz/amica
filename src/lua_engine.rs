@@ -1,18 +1,18 @@
 use hyper::{Body, Request, Response};
 use rlua::{FromLuaMulti, Function, Lua, MultiValue, ToLuaMulti};
 
-use crate::proxy::{ProxyRequest, ProxyResponse};
+use crate::intermediate_proxy_data::{ProxyRequest, ProxyResponse};
 
-pub(crate) struct LuaEngine {
+pub struct LuaEngine {
     lua_vm: Lua,
 }
 
 impl LuaEngine {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         LuaEngine { lua_vm: Lua::new() }
     }
 
-    pub(crate) fn load(&self, lua_code: &str) -> rlua::Result<()> {
+    pub fn load(&self, lua_code: &str) -> rlua::Result<()> {
         self.lua_vm.context(|lua_context| {
             lua_context.load(lua_code).eval::<MultiValue>()?;
             Ok(())
@@ -34,13 +34,14 @@ impl LuaEngine {
         })
     }
 
-    pub(crate) fn call_on_http_request(&self, req: ProxyRequest) -> rlua::Result<Request<Body>> {
+    pub fn call_on_http_request(&self, req: ProxyRequest) -> anyhow::Result<Request<Body>> {
         let request = self.call_lua_function::<_, ProxyRequest>("on_http_request", req)?;
-        Ok(request.into())
+
+        request.to_request()
     }
 
-    pub(crate) fn call_on_http_response(&self, res: ProxyResponse) -> rlua::Result<Response<Body>> {
+    pub fn call_on_http_response(&self, res: ProxyResponse) -> anyhow::Result<Response<Body>> {
         let response = self.call_lua_function::<_, ProxyResponse>("on_http_response", res)?;
-        Ok(response.into())
+        response.to_response()
     }
 }
