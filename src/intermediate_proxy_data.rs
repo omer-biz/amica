@@ -4,7 +4,7 @@ use hyper::{body::to_bytes, Body, Request, Response};
 use rlua::UserData;
 
 #[derive(Clone)]
-pub(crate) struct ProxyRequest {
+pub struct ProxyRequest {
     uri: String,
     method: String,
     headers: HashMap<String, String>,
@@ -36,7 +36,7 @@ impl ProxyRequest {
         })
     }
 
-    pub fn to_request(self) -> Result<Request<Body>, Box<dyn std::error::Error>> {
+    pub fn to_request(self) -> anyhow::Result<Request<Body>> {
         let mut request = Request::builder()
             .method(self.method.as_str())
             .uri(self.uri.as_str());
@@ -80,7 +80,7 @@ impl UserData for ProxyRequest {
 }
 
 #[derive(Clone)]
-pub(crate) struct ProxyResponse {
+pub struct ProxyResponse {
     status: u16,
     headers: HashMap<String, String>,
     body: String,
@@ -112,7 +112,7 @@ impl UserData for ProxyResponse {
 }
 
 impl ProxyResponse {
-    pub(crate) async fn from(response: Response<Body>) -> Result<Self, hyper::Error> {
+    pub async fn from(response: Response<Body>) -> Result<Self, hyper::Error> {
         let (parts, body) = response.into_parts();
 
         let headers = parts
@@ -136,7 +136,7 @@ impl ProxyResponse {
         })
     }
 
-    pub fn to_response(self) -> Result<Response<Body>, Box<dyn std::error::Error>> {
+    pub fn to_response(self) -> anyhow::Result<Response<Body>> {
         let mut response = Response::builder().status(self.status);
 
         for (key, value) in self.headers {
