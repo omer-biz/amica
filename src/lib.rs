@@ -24,7 +24,7 @@ pub struct Args {
 
     /// Address to bind to.
     #[arg(short, long, value_name = "ip:port")]
-    address: String,
+    address: Option<String>,
 }
 
 pub struct Proxy {
@@ -36,11 +36,12 @@ impl Proxy {
         Proxy { args }.run().await
     }
 
-    async fn run(&self) -> anyhow::Result<()> {
-        let tcp_listener = TcpListener::bind(&self.args.address)
+    async fn run(self) -> anyhow::Result<()> {
+        let address = self.args.address.unwrap_or("127.0.0.1:9001".to_string());
+        let tcp_listener = TcpListener::bind(&address)
             .await
-            .with_context(|| format!("Can not bind to {}", self.args.address))?;
-        println!("Listening on {}", self.args.address);
+            .with_context(|| format!("Can not bind to {}", address))?;
+        println!("Listening on {}", address);
 
         loop {
             let (client, sock_addr) = tcp_listener.accept().await?;
