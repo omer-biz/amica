@@ -1,5 +1,7 @@
+use std::sync::Arc;
 use hyper::{Body, Request, Response};
 use rlua::{FromLuaMulti, Function, Lua, MultiValue, ToLuaMulti};
+use tokio::sync::{mpsc, oneshot, Mutex};
 
 use crate::intermediate_proxy_data::{ProxyRequest, ProxyResponse};
 
@@ -37,111 +39,115 @@ impl LuaEngine {
     pub fn call_on_http_request(&self, req: ProxyRequest) -> anyhow::Result<Request<Body>> {
         let request = self.call_lua_function::<_, ProxyRequest>("on_http_request", req)?;
 
-        request.to_request()
+        request.into_request()
     }
 
     pub fn call_on_http_response(&self, res: ProxyResponse) -> anyhow::Result<Response<Body>> {
         let response = self.call_lua_function::<_, ProxyResponse>("on_http_response", res)?;
-        response.to_response()
+        response.into_response()
     }
 }
 
-// will work on this some other time
-// pub struct LuaPool {
-//     pool: Vec<Option<LuaEngine>>,
-//     receiver: mpsc::UnboundedReceiver<Message>,
-//     lua_code: String,
-// }
-//
-// #[derive(Clone)]
-// pub struct Messenger {
-//     sender: mpsc::UnboundedSender<Message>,
-// }
-//
-// impl Messenger {
-//     pub async fn call_func(&self, function: &str, args: (u32, u32)) -> anyhow::Result<String> {
-//         let (otx, orx) = oneshot::channel();
-//         let msg = Message {
-//             function: function.to_string(),
-//             args,
-//             responder: otx,
-//         };
-//
-//         self.sender.send(msg)?;
-//
-//         Ok(orx.await?)
-//     }
-// }
-//
-// #[derive(Debug)]
-// struct Message {
-//     args: (u32, u32),
-//     function: String,
-//     responder: oneshot::Sender<String>,
-// }
-//
-// impl LuaPool {
-//     pub fn init(size: usize, code: &str) -> anyhow::Result<(Self, Messenger)> {
-//         let (mtx, mrx) = mpsc::unbounded_channel();
-//
-//         let msgr = Messenger { sender: mtx };
-//
-//         let mut pool = Vec::with_capacity(size);
-//
-//         for _ in 0..size {
-//             let engine = LuaEngine::new();
-//             engine.load(code)?;
-//
-//             pool.push(Some(engine))
-//         }
-//
-//         Ok((
-//             Self {
-//                 lua_code: code.to_string(),
-//                 pool,
-//                 receiver: mrx,
-//             },
-//             msgr,
-//         ))
-//     }
-//
-//     pub fn start(mut self) {
-//         tokio::spawn(async move {
-//             while let Some(msg) = self.receiver.recv().await {
-//                 let Message {
-//                     args,
-//                     function,
-//                     responder,
-//                 } = msg;
-//
-//                 // println!("before: {:#?}\n\n", self.pool);
-//
-//                 let engine = self
-//                     .pool
-//                     .iter_mut()
-//                     .find(|eng| eng.is_some())
-//                     .unwrap()
-//                     .take()
-//                     .unwrap();
-//
-//                 // println!("after: {:#?}\n\n", self.pool);
-//
-//                 tokio::spawn(async move {
-//                     let res = engine
-//                         .call_lua_function::<_, String>(function.as_str(), args)
-//                         .unwrap();
-//                     responder.send(res).unwrap();
-//                 });
-//
-//                 for eng in self.pool.iter_mut() {
-//                     if eng.is_none() {
-//                         let lua_eng = LuaEngine::new();
-//                         lua_eng.load(self.lua_code.as_str()).unwrap();
-//                         let _ = eng.insert(lua_eng);
-//                         break;
-//                     }
-//                 }
-//             }
-//         });
-//     }
-// }
+#[derive(Debug)]
+enum ProxyData {
+    Request {
+        arg: ProxyRequest,
+        responder: oneshot::Sender<Request<Body>>,
+    },
+    Response {
+        arg: ProxyResponse,
+        responder: oneshot::Sender<Response<Body>>,
+    },
+}
+
+#[derive(Clone)]
+pub struct Messenger {
+    sender: mpsc::UnboundedSender<ProxyData>,
+}
+
+impl Messenger {
+    pub async fn call_on_http_request(&self, req: ProxyRequest) -> anyhow::Result<Request<Body>> {
+        let (otx, orx) = oneshot::channel();
+
+        let request = ProxyData::Request {
+            arg: req,
+            responder: otx,
+        };
+
+        self.sender.send(request)?;
+
+        Ok(orx.await?)
+    }
+
+    pub async fn call_on_http_response(
+        &self,
+        res: ProxyResponse,
+    ) -> anyhow::Result<Response<Body>> {
+        let (otx, orx) = oneshot::channel();
+
+        let request = ProxyData::Response {
+            arg: res,
+            responder: otx,
+        };
+
+        self.sender.send(request)?;
+
+        Ok(orx.await?)
+    }
+}
+
+pub struct LuaPool {
+    workers: Vec<Worker>,
+}
+
+impl LuaPool {
+    pub fn build(size: usize, lua_code: String) -> anyhow::Result<(Self, Messenger)> {
+        assert!(size > 0);
+
+        let (sender, receiver) = mpsc::unbounded_channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+
+        let mut workers = Vec::with_capacity(size);
+
+        for _ in 0..size {
+            workers.push(Worker::build(receiver.clone(), lua_code.to_string())?)
+        }
+
+        Ok((LuaPool { workers }, Messenger { sender }))
+    }
+}
+
+struct Worker {
+    handle: Option<tokio::task::JoinHandle<Result<(), anyhow::Error>>>,
+}
+
+impl Worker {
+    fn build(
+        reciver: Arc<Mutex<mpsc::UnboundedReceiver<ProxyData>>>,
+        lua_code: String,
+    ) -> anyhow::Result<Worker> {
+        let thread = tokio::spawn(async move {
+            let lua_engine = LuaEngine::new();
+            lua_engine.load(lua_code.as_str())?;
+
+            while let Some(msg) = reciver.lock().await.recv().await {
+                match msg {
+                    ProxyData::Request { arg, responder } => {
+                        let req = lua_engine.call_on_http_request(arg)?;
+                        let _ = responder.send(req);
+                    }
+                    ProxyData::Response { arg, responder } => {
+                        let res = lua_engine.call_on_http_response(arg)?;
+                        let _ = responder.send(res);
+                    }
+                }
+            }
+
+            Ok::<(), anyhow::Error>(())
+        });
+
+        Ok(Worker {
+            handle: Some(thread),
+        })
+    }
+}

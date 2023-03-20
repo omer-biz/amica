@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use hyper::{body::to_bytes, Body, Request, Response};
 use rlua::UserData;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ProxyRequest {
     uri: String,
     method: String,
@@ -36,7 +36,7 @@ impl ProxyRequest {
         })
     }
 
-    pub fn to_request(self) -> anyhow::Result<Request<Body>> {
+    pub fn into_request(self) -> anyhow::Result<Request<Body>> {
         let mut request = Request::builder()
             .method(self.method.as_str())
             .uri(self.uri.as_str());
@@ -77,7 +77,7 @@ impl UserData for ProxyRequest {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ProxyResponse {
     status: u16,
     headers: HashMap<String, String>,
@@ -132,7 +132,7 @@ impl ProxyResponse {
         })
     }
 
-    pub fn to_response(self) -> anyhow::Result<Response<Body>> {
+    pub fn into_response(self) -> anyhow::Result<Response<Body>> {
         let mut response = Response::builder().status(self.status);
 
         for (key, value) in self.headers {
