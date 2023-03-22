@@ -86,7 +86,7 @@ async fn handle_client(
     if method == "CONNECT" {
         let mut server =
             TcpStream::connect(String::from_utf8_lossy(host.value).to_string()).await?;
-        client.read(&mut buf).await?;
+        client.read_exact(&mut buf[..nbytes]).await?;
         client.write_all(b"HTTP/1.1 200 OK\r\n\r\n").await?;
         tokio::io::copy_bidirectional(&mut server, &mut client).await?;
     } else {

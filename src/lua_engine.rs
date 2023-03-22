@@ -98,7 +98,7 @@ impl Messenger {
 }
 
 pub struct LuaPool {
-    workers: Vec<Worker>,
+    _workers: Vec<Worker>,
 }
 
 impl LuaPool {
@@ -114,12 +114,12 @@ impl LuaPool {
             workers.push(Worker::build(receiver.clone(), lua_code.to_string())?)
         }
 
-        Ok((LuaPool { workers }, Messenger { sender }))
+        Ok((LuaPool { _workers: workers }, Messenger { sender }))
     }
 }
 
 struct Worker {
-    handle: Option<tokio::task::JoinHandle<Result<(), anyhow::Error>>>,
+    _handle: Option<tokio::task::JoinHandle<Result<(), anyhow::Error>>>,
 }
 
 impl Worker {
@@ -148,7 +148,7 @@ impl Worker {
         });
 
         Ok(Worker {
-            handle: Some(thread),
+            _handle: Some(thread),
         })
     }
 }
@@ -172,19 +172,19 @@ mod tests {
             let msgr = msgr.clone();
             handles.push(tokio::spawn(async move {
                 let request = ProxyRequest::new("http://google.com", "GET", "Hello");
-                let request = msgr.call_on_http_request(request).await;
+                let _request = msgr.call_on_http_request(request).await;
             }))
         }
         {
             let msgr = msgr.clone();
             handles.push(tokio::spawn(async move {
                 let request = ProxyRequest::new("http://google.com", "GET", "load");
-                let request = msgr.call_on_http_request(request).await;
+                let _request = msgr.call_on_http_request(request).await;
             }));
         }
 
         let response = ProxyResponse::new(200, "bye");
-        let response = msgr.call_on_http_response(response).await;
+        let _response = msgr.call_on_http_response(response).await;
 
         for h in handles {
             let _ = h.await;
