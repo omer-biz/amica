@@ -11,9 +11,7 @@ use tokio::{
 };
 
 use intermediate_proxy_data::{ProxyRequest, ProxyResponse};
-use lua_engine::LuaEngine;
-
-static mut LUA_CODE: Option<String> = None;
+use lua_engine::{LuaPool, Messenger};
 
 #[derive(Parser)]
 pub struct Args {
@@ -38,6 +36,13 @@ impl Proxy {
 
     async fn run(self) -> anyhow::Result<()> {
         let address = self.args.address.unwrap_or("127.0.0.1:9001".to_string());
+        let mut lua_msgr = None;
+
+        if let Some(path) = self.args.filter_script {
+            let (_, msgr) = LuaPool::build(10, std::fs::read_to_string(path)?)?;
+            lua_msgr = Some(msgr);
+        }
+
         let tcp_listener = TcpListener::bind(&address)
             .await
             .with_context(|| format!("Can not bind to {}", address))?;
@@ -46,12 +51,10 @@ impl Proxy {
         loop {
             let (client, sock_addr) = tcp_listener.accept().await?;
             println!("client connected on: {}", sock_addr);
+            let lua_msgr = lua_msgr.clone();
 
-            if let Some(path) = &self.args.filter_script {
-                unsafe { LUA_CODE = Some(std::fs::read_to_string(path)?) }
-            }
             tokio::spawn(async move {
-                if let Err(error) = handle_client(client).await {
+                if let Err(error) = handle_client(client, lua_msgr).await {
                     eprintln!("Error: {}", error);
                 }
             });
@@ -59,7 +62,10 @@ impl Proxy {
     }
 }
 
-async fn handle_client(mut client: TcpStream) -> anyhow::Result<()> {
+async fn handle_client(
+    mut client: TcpStream,
+    mut lua_msgr: Option<Messenger>,
+) -> anyhow::Result<()> {
     let mut buf = [0; 1024];
     let nbytes = client.peek(&mut buf).await?;
 
@@ -77,8 +83,6 @@ async fn handle_client(mut client: TcpStream) -> anyhow::Result<()> {
         .find(|header| header.name == "Host")
         .with_context(|| "Can't find `Host` in the request header")?;
 
-    println!("host: {}", String::from_utf8_lossy(host.value));
-
     if method == "CONNECT" {
         let mut server =
             TcpStream::connect(String::from_utf8_lossy(host.value).to_string()).await?;
@@ -87,29 +91,30 @@ async fn handle_client(mut client: TcpStream) -> anyhow::Result<()> {
         tokio::io::copy_bidirectional(&mut server, &mut client).await?;
     } else {
         Http::new()
-            .serve_connection(client, service_fn(handle_http_request))
+            .serve_connection(
+                client,
+                service_fn(|req| handle_http_request(req, lua_msgr.take())),
+            )
             .await?;
     }
 
     Ok(())
 }
 
-async fn handle_http_request(request: Request<Body>) -> anyhow::Result<Response<Body>> {
-    let no_lua_vm = unsafe { LUA_CODE.is_none() };
-
-    let response = if no_lua_vm {
-        make_http_request(request).await?
-    } else {
-        let lua_engine = LuaEngine::new();
-        unsafe { lua_engine.load(LUA_CODE.as_ref().expect(""))? }
-
+async fn handle_http_request(
+    request: Request<Body>,
+    lua_msgr: Option<Messenger>,
+) -> anyhow::Result<Response<Body>> {
+    let response = if let Some(lua_msgr) = lua_msgr {
         let proxy_request = ProxyRequest::from(request).await?;
-        let request = lua_engine.call_on_http_request(proxy_request)?;
+        let request = lua_msgr.call_on_http_request(proxy_request).await?;
 
         let response = make_http_request(request).await?;
 
         let proxy_response = ProxyResponse::from(response).await?;
-        lua_engine.call_on_http_response(proxy_response)?
+        lua_msgr.call_on_http_response(proxy_response).await?
+    } else {
+        make_http_request(request).await?
     };
 
     Ok::<_, anyhow::Error>(response)
