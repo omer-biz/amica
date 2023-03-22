@@ -1,4 +1,5 @@
 use std::sync::Arc;
+
 use hyper::{Body, Request, Response};
 use rlua::{FromLuaMulti, Function, Lua, MultiValue, ToLuaMulti};
 use tokio::sync::{mpsc, oneshot, Mutex};
@@ -149,5 +150,44 @@ impl Worker {
         Ok(Worker {
             handle: Some(thread),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs::read_to_string;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_lua_engine() {
+        let lua_code = read_to_string("./filter.lua").expect("read file");
+        let capacity = 12;
+
+        let (_, msgr) = LuaPool::build(capacity, lua_code).expect("LuaPool build failed");
+
+        let mut handles = Vec::with_capacity(capacity);
+
+        for _ in 0..capacity {
+            let msgr = msgr.clone();
+            handles.push(tokio::spawn(async move {
+                let request = ProxyRequest::new("http://google.com", "GET", "Hello");
+                let request = msgr.call_on_http_request(request).await;
+            }))
+        }
+        {
+            let msgr = msgr.clone();
+            handles.push(tokio::spawn(async move {
+                let request = ProxyRequest::new("http://google.com", "GET", "load");
+                let request = msgr.call_on_http_request(request).await;
+            }));
+        }
+
+        let response = ProxyResponse::new(200, "bye");
+        let response = msgr.call_on_http_response(response).await;
+
+        for h in handles {
+            let _ = h.await;
+        }
     }
 }

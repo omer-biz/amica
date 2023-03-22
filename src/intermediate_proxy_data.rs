@@ -47,6 +47,19 @@ impl ProxyRequest {
 
         Ok(request.body(Body::from(self.body))?)
     }
+
+    pub fn new(uri: &str, method: &str, body: &str) -> Self {
+        Self {
+            uri: uri.to_string(),
+            method: method.to_string(),
+            headers: Default::default(),
+            body: body.to_string(),
+        }
+    }
+
+    pub fn with_header(&mut self, key: &str, val: &str) {
+        let _ = self.headers.insert(key.to_string(), val.to_string());
+    }
 }
 
 impl UserData for ProxyRequest {
@@ -140,5 +153,17 @@ impl ProxyResponse {
         }
 
         Ok(response.body(Body::from(self.body))?)
+    }
+
+    pub fn new(status: u16, body: &str) -> Self {
+        Self {
+            status,
+            headers: Default::default(),
+            body: body.to_string(),
+        }
+    }
+
+    pub fn with_header(&mut self, key: &str, val: &str) {
+        let _ = self.headers.insert(key.to_string(), val.to_string());
     }
 }
