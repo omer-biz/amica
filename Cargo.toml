@@ -11,4 +11,4 @@ clap = { version = "4.1.8", features = ["derive"] }
 httparse = "1.8.0"
 hyper = { version = "0.14.24", features = ["client", "http1", "http2", "tcp", "server"] }
 rlua = "0.19.4"
-tokio = { version = "1.26.0", features = ["tokio-macros", "rt-multi-thread", "macros"] }
+tokio = { version = "1.26.0", features = ["tokio-macros", "rt-multi-thread", "macros", "fs"] }

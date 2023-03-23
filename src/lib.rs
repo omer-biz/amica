@@ -39,7 +39,7 @@ impl Proxy {
         let mut lua_msgr = None;
 
         if let Some(path) = self.args.filter_script {
-            let (_, msgr) = LuaPool::build(10, std::fs::read_to_string(path)?)?;
+            let (_, msgr) = LuaPool::build(10, path)?;
             lua_msgr = Some(msgr);
         }
 

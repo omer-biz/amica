@@ -1,8 +1,11 @@
-use std::sync::Arc;
+use std::{path::PathBuf, sync::Arc};
 
 use hyper::{Body, Request, Response};
 use rlua::{FromLuaMulti, Function, Lua, MultiValue, ToLuaMulti};
-use tokio::sync::{mpsc, oneshot, Mutex};
+use tokio::{
+    fs::{self, read_to_string},
+    sync::{mpsc, oneshot, Mutex},
+};
 
 use crate::intermediate_proxy_data::{ProxyRequest, ProxyResponse};
 
@@ -102,7 +105,7 @@ pub struct LuaPool {
 }
 
 impl LuaPool {
-    pub fn build(size: usize, lua_code: String) -> anyhow::Result<(Self, Messenger)> {
+    pub fn build(size: usize, lua_code: PathBuf) -> anyhow::Result<(Self, Messenger)> {
         assert!(size > 0);
 
         let (sender, receiver) = mpsc::unbounded_channel();
@@ -111,7 +114,7 @@ impl LuaPool {
         let mut workers = Vec::with_capacity(size);
 
         for _ in 0..size {
-            workers.push(Worker::build(receiver.clone(), lua_code.to_string())?)
+            workers.push(Worker::build(receiver.clone(), lua_code.clone())?)
         }
 
         Ok((LuaPool { _workers: workers }, Messenger { sender }))
@@ -125,13 +128,27 @@ struct Worker {
 impl Worker {
     fn build(
         reciver: Arc<Mutex<mpsc::UnboundedReceiver<ProxyData>>>,
-        lua_code: String,
+        lua_script_path: PathBuf,
     ) -> anyhow::Result<Worker> {
         let thread = tokio::spawn(async move {
+            let mut old_tstamp = fs::metadata(&lua_script_path).await?.accessed()?;
+
+            let buf = read_to_string(&lua_script_path).await?;
+
             let lua_engine = LuaEngine::new();
-            lua_engine.load(lua_code.as_str())?;
+            lua_engine.load(buf.as_str())?;
 
             while let Some(msg) = reciver.lock().await.recv().await {
+                let new_tstamp = fs::metadata(&lua_script_path).await?.accessed()?;
+
+                if new_tstamp > old_tstamp {
+                    println!("New time stamp: {:?}, old: {:?}", new_tstamp, old_tstamp);
+                    let buf = read_to_string(&lua_script_path).await?;
+                    lua_engine.load(&buf)?;
+
+                    old_tstamp = new_tstamp;
+                }
+
                 match msg {
                     ProxyData::Request { arg, responder } => {
                         let req = lua_engine.call_on_http_request(arg)?;
@@ -155,35 +172,34 @@ impl Worker {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::read_to_string;
 
     use super::*;
 
     #[tokio::test]
     async fn test_lua_engine() {
-        let lua_code = read_to_string("./filter.lua").expect("read file");
         let capacity = 12;
 
-        let (_, msgr) = LuaPool::build(capacity, lua_code).expect("LuaPool build failed");
+        let (_, msgr) =
+            LuaPool::build(capacity, PathBuf::from("./filter.lua")).expect("LuaPool build failed");
 
         let mut handles = Vec::with_capacity(capacity);
 
         for _ in 0..capacity {
             let msgr = msgr.clone();
             handles.push(tokio::spawn(async move {
-                let request = ProxyRequest::new("http://google.com", "GET", "Hello");
+                let request = ProxyRequest::_new("http://google.com", "GET", "Hello");
                 let _request = msgr.call_on_http_request(request).await;
             }))
         }
         {
             let msgr = msgr.clone();
             handles.push(tokio::spawn(async move {
-                let request = ProxyRequest::new("http://google.com", "GET", "load");
+                let request = ProxyRequest::_new("http://google.com", "GET", "load");
                 let _request = msgr.call_on_http_request(request).await;
             }));
         }
 
-        let response = ProxyResponse::new(200, "bye");
+        let response = ProxyResponse::_new(200, "bye");
         let _response = msgr.call_on_http_response(response).await;
 
         for h in handles {
