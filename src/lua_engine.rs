@@ -173,6 +173,8 @@ impl Worker {
 #[cfg(test)]
 mod tests {
 
+    use hyper::body;
+
     use super::*;
 
     #[tokio::test]
@@ -205,5 +207,71 @@ mod tests {
         for h in handles {
             let _ = h.await;
         }
+    }
+
+    #[tokio::test]
+    async fn test_messenger() -> Result<(), anyhow::Error> {
+        let lua_code: PathBuf = "lua_test/messenger.lua".into();
+
+        let (_, messenger) = LuaPool::build(10, lua_code)?;
+
+        let mut res = ProxyResponse::_new(400, "Hello, World");
+        res._with_header("header1", "value1");
+        res._with_header("header2", "value2");
+        res._with_header("header3", "value3");
+
+        let mut expected_res = hyper::Response::builder()
+            .status(401)
+            .header("header1", "changed_value1")
+            .header("header2", "changed_value2")
+            .header("header3", "changed_value3")
+            .header("new_header", "new_header")
+            .header("content-length", "15")
+            .body(Body::from("Good Bye, World"))?;
+
+        let mut actual_res = messenger.call_on_http_response(res).await?;
+
+        assert_response_eq(&actual_res, &expected_res);
+        assert_body_eq(actual_res.body_mut(), expected_res.body_mut()).await?;
+
+        let mut req = ProxyRequest::_new("http://example.com", "GET", "Hello, World");
+        req._with_header("header1", "value1");
+        req._with_header("header2", "value2");
+        req._with_header("header3", "value3");
+
+        let mut expected_req = hyper::Request::builder()
+            .method("POST")
+            .uri("http://www.example.com")
+            .header("header1", "changed_value1")
+            .header("header2", "changed_value2")
+            .header("header3", "changed_value3")
+            .header("new_header", "new_header")
+            .header("content-length", "15")
+            .body(Body::from("Good Bye, World"))?;
+
+        let mut actual_req = messenger.call_on_http_request(req).await?;
+
+        assert_requests_eq(&expected_req, &actual_req);
+        assert_body_eq(actual_req.body_mut(), expected_req.body_mut()).await?;
+
+        Ok(())
+    }
+
+    fn assert_requests_eq(req1: &Request<Body>, req2: &Request<Body>) {
+        assert_eq!(req1.method(), req2.method());
+        assert_eq!(req1.uri(), req2.uri());
+        assert_eq!(req1.headers(), req2.headers());
+    }
+
+    async fn assert_body_eq(body1: &mut Body, body2: &mut Body) -> Result<(), anyhow::Error> {
+        Ok(assert_eq!(
+            body::to_bytes(body1).await?,
+            body::to_bytes(body2).await?
+        ))
+    }
+
+    fn assert_response_eq(res1: &Response<Body>, res2: &Response<Body>) {
+        assert_eq!(res1.headers(), res2.headers());
+        assert_eq!(res1.status(), res2.status());
     }
 }
