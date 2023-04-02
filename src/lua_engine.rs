@@ -141,6 +141,15 @@ impl Worker {
             let lua_engine = LuaEngine::new();
             lua_engine.load(buf.as_str())?;
 
+            fn call_or_error<R>(res: Result<R, anyhow::Error>, responder: oneshot::Sender<R>)
+            where
+                R: std::fmt::Debug,
+            {
+                let _ = res
+                    .map(|res| responder.send(res).expect("Coudn't send to worker"))
+                    .map_err(|err| eprintln!("Lua Runtime Error: {err}"));
+            }
+
             while let Some(msg) = reciver.lock().await.recv().await {
                 let new_tstamp = fs::metadata(&lua_script_path).await?.accessed()?;
 
@@ -154,25 +163,11 @@ impl Worker {
                 match msg {
                     ProxyData::Request { arg, responder } => {
                         let req = lua_engine.call_on_http_request(arg);
-                        match req {
-                            Ok(req) => {
-                                responder
-                                    .send(req)
-                                    .expect("Couldn't send request to worker");
-                            }
-                            Err(err) => eprintln!("{err}"),
-                        }
+                        call_or_error(req, responder);
                     }
                     ProxyData::Response { arg, responder } => {
                         let res = lua_engine.call_on_http_response(arg);
-                        match res {
-                            Ok(res) => {
-                                responder
-                                    .send(res)
-                                    .expect("Couldn't send response to worker");
-                            }
-                            Err(err) => eprintln!("{err}"),
-                        }
+                        call_or_error(res, responder);
                     }
                 }
             }
