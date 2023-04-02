@@ -107,6 +107,9 @@ pub struct LuaPool {
 impl LuaPool {
     pub fn build(size: usize, lua_code: PathBuf) -> anyhow::Result<(Self, Messenger)> {
         assert!(size > 0);
+        assert!(lua_code
+            .try_exists()
+            .expect("Can't check if the lua file exists"));
 
         let (sender, receiver) = mpsc::unbounded_channel();
         let receiver = Arc::new(Mutex::new(receiver));
@@ -142,7 +145,6 @@ impl Worker {
                 let new_tstamp = fs::metadata(&lua_script_path).await?.accessed()?;
 
                 if new_tstamp > old_tstamp {
-                    println!("New time stamp: {:?}, old: {:?}", new_tstamp, old_tstamp);
                     let buf = read_to_string(&lua_script_path).await?;
                     lua_engine.load(&buf)?;
 
@@ -151,12 +153,26 @@ impl Worker {
 
                 match msg {
                     ProxyData::Request { arg, responder } => {
-                        let req = lua_engine.call_on_http_request(arg)?;
-                        let _ = responder.send(req);
+                        let req = lua_engine.call_on_http_request(arg);
+                        match req {
+                            Ok(req) => {
+                                responder
+                                    .send(req)
+                                    .expect("Couldn't send request to worker");
+                            }
+                            Err(err) => eprintln!("{err}"),
+                        }
                     }
                     ProxyData::Response { arg, responder } => {
-                        let res = lua_engine.call_on_http_response(arg)?;
-                        let _ = responder.send(res);
+                        let res = lua_engine.call_on_http_response(arg);
+                        match res {
+                            Ok(res) => {
+                                responder
+                                    .send(res)
+                                    .expect("Couldn't send response to worker");
+                            }
+                            Err(err) => eprintln!("{err}"),
+                        }
                     }
                 }
             }
