@@ -1,5 +1,5 @@
 mod intermediate_proxy_data;
-mod lua_engine;
+pub mod lua_engine;
 
 use anyhow::Context;
 use clap::Parser;
@@ -27,6 +27,11 @@ pub struct Args {
     /// Number of Proxy pools to spwan. By default it's 1.
     #[arg(short, long, value_name = "pool number")]
     pool_number: Option<usize>,
+
+    /// Verbosity. if turned on shows the request and response as they are
+    /// happening for `http` requests.
+    #[arg(short, long)]
+    verbose: bool,
 }
 
 pub struct Proxy {
@@ -51,16 +56,21 @@ impl Proxy {
         let tcp_listener = TcpListener::bind(&address)
             .await
             .with_context(|| format!("Can not bind to {}", address))?;
-        println!("Listening on {}", address);
+        if self.args.verbose {
+            println!("Listening on {}", address);
+        }
 
         loop {
             let (client, sock_addr) = tcp_listener.accept().await?;
-            println!("client connected on: {}", sock_addr);
+            if self.args.verbose {
+                println!("Request coming from: {}", sock_addr);
+            }
+
             let lua_msgr = lua_msgr.clone();
 
             tokio::spawn(async move {
-                if let Err(error) = handle_client(client, lua_msgr).await {
-                    eprintln!("Error: {}", error);
+                if let Err(error) = handle_client(client, lua_msgr, self.args.verbose).await {
+                    eprintln!("Handle Client Error: {:#?}", error);
                 }
             });
         }
@@ -70,6 +80,7 @@ impl Proxy {
 async fn handle_client(
     mut client: TcpStream,
     mut lua_msgr: Option<Messenger>,
+    verbose: bool,
 ) -> anyhow::Result<()> {
     let mut buf = [0; 1024];
     let nbytes = client.peek(&mut buf).await?;
@@ -98,7 +109,7 @@ async fn handle_client(
         Http::new()
             .serve_connection(
                 client,
-                service_fn(|req| handle_http_request(req, lua_msgr.take())),
+                service_fn(|req| handle_http_request(req, lua_msgr.take(), verbose)),
             )
             .await?;
     }
@@ -109,7 +120,11 @@ async fn handle_client(
 async fn handle_http_request(
     request: Request<Body>,
     lua_msgr: Option<Messenger>,
+    verbose: bool,
 ) -> anyhow::Result<Response<Body>> {
+    if verbose {
+        print_request(&request);
+    }
     let response = if let Some(lua_msgr) = lua_msgr {
         let proxy_request = ProxyRequest::from(request).await?;
         let request = lua_msgr.call_on_http_request(proxy_request).await?;
@@ -121,10 +136,39 @@ async fn handle_http_request(
     } else {
         make_http_request(request).await?
     };
+    if verbose {
+        print_response(&response);
+    }
 
     Ok::<_, anyhow::Error>(response)
 }
 
 async fn make_http_request(request: Request<Body>) -> hyper::Result<Response<Body>> {
     hyper::Client::new().request(request).await
+}
+
+fn print_response(response: &Response<Body>) {
+    println!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    println!("< status: {}", response.status());
+    println!("< version: {:?}", response.version());
+
+    println!("> headers: ");
+    for (k, v) in response.headers() {
+        println!("> \t{}: {:?}", k, v);
+    }
+
+    println!("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+}
+
+fn print_request(request: &Request<Body>) {
+    println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    println!("> method: {}", request.method());
+    println!("> uri: {}", request.uri());
+    println!("> version: {:?}", request.version());
+
+    println!("> headers: ");
+    for (k, v) in request.headers() {
+        println!("> \t{}: {:?}", k, v);
+    }
+    println!(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 }

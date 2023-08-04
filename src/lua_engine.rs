@@ -52,6 +52,12 @@ impl LuaEngine {
     }
 }
 
+impl Default for LuaEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Debug)]
 enum ProxyData {
     Request {
@@ -141,13 +147,20 @@ impl Worker {
             let lua_engine = LuaEngine::new();
             lua_engine.load(buf.as_str())?;
 
-            fn call_or_error<R>(res: Result<R, anyhow::Error>, responder: oneshot::Sender<R>)
-            where
-                R: std::fmt::Debug,
-            {
-                let _ = res
-                    .map(|res| responder.send(res).expect("Coudn't send to worker"))
-                    .map_err(|err| eprintln!("Lua Runtime Error: {err}"));
+            macro_rules! call_or_error {
+                ($req:ident, $responder:ident) => {
+                    let _ = $req
+                        .map(|res| $responder.send(res).expect("Coudn't send to worker"))
+                        .map_err(|err| err.downcast::<rlua::Error>())
+                        .map_err(|err| {
+                            let _ = err
+                                .map(|err| match err {
+                                    // rlua::Error::FromLuaConversionError { .. } =>
+                                    oth => eprintln!("Lua Error: {oth:?}"),
+                                })
+                                .map_err(|err| eprintln!("Unknown Error: {err:?}"));
+                        });
+                };
             }
 
             while let Some(msg) = reciver.lock().await.recv().await {
@@ -163,16 +176,16 @@ impl Worker {
                 match msg {
                     ProxyData::Request { arg, responder } => {
                         let req = lua_engine.call_on_http_request(arg);
-                        call_or_error(req, responder);
+                        call_or_error!(req, responder);
                     }
                     ProxyData::Response { arg, responder } => {
                         let res = lua_engine.call_on_http_response(arg);
-                        call_or_error(res, responder);
+                        call_or_error!(res, responder);
                     }
                 }
             }
 
-            Ok::<(), anyhow::Error>(())
+            Ok::<_, anyhow::Error>(())
         });
 
         Ok(Worker {
