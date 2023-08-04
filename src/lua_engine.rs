@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::Arc};
 
 use hyper::{Body, Request, Response};
-use rlua::{FromLuaMulti, Function, Lua, MultiValue, ToLuaMulti};
+use rlua::{Function, Lua, MultiValue};
 use tokio::{
     fs::{self, read_to_string},
     sync::{mpsc, oneshot, Mutex},
@@ -22,33 +22,35 @@ impl LuaEngine {
         self.lua_vm.context(|lua_context| {
             lua_context.load(lua_code).eval::<MultiValue>()?;
             Ok(())
-        })?;
-
-        Ok(())
-    }
-
-    fn call_lua_function<A, R>(&self, function: &str, args: A) -> rlua::Result<R>
-    where
-        A: for<'lua> ToLuaMulti<'lua>,
-        R: for<'lua> FromLuaMulti<'lua>,
-    {
-        self.lua_vm.context(move |lua_context| {
-            let lua_function = lua_context.globals().get::<_, Function>(function)?;
-            let lua_result = lua_function.call::<A, R>(args)?;
-
-            Ok(lua_result)
         })
     }
 
     pub fn call_on_http_request(&self, req: ProxyRequest) -> anyhow::Result<Request<Body>> {
-        let request = self.call_lua_function::<_, ProxyRequest>("on_http_request", req)?;
-
-        request.into_request()
+        self.lua_vm
+            .context(move |lua_context| {
+                if let Ok(lua_function) =
+                    lua_context.globals().get::<_, Function>("on_http_request")
+                {
+                    lua_function.call::<_, ProxyRequest>(req)
+                } else {
+                    Ok(req)
+                }
+            })?
+            .into_request()
     }
 
     pub fn call_on_http_response(&self, res: ProxyResponse) -> anyhow::Result<Response<Body>> {
-        let response = self.call_lua_function::<_, ProxyResponse>("on_http_response", res)?;
-        response.into_response()
+        self.lua_vm
+            .context(move |lua_context| {
+                if let Ok(lua_function) =
+                    lua_context.globals().get::<_, Function>("on_http_response")
+                {
+                    lua_function.call::<_, ProxyResponse>(res)
+                } else {
+                    Ok(res)
+                }
+            })?
+            .into_response()
     }
 }
 
