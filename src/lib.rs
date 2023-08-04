@@ -23,6 +23,10 @@ pub struct Args {
     /// Address to bind to.
     #[arg(short, long, value_name = "ip:port")]
     address: Option<String>,
+
+    /// Number of Proxy pools to spwan. By default it's 1.
+    #[arg(short, long, value_name = "pool number")]
+    pool_number: Option<usize>,
 }
 
 pub struct Proxy {
@@ -39,7 +43,8 @@ impl Proxy {
         let mut lua_msgr = None;
 
         if let Some(path) = self.args.filter_script {
-            let (_, msgr) = LuaPool::build(10, path)?;
+            let pool_number = self.args.pool_number.unwrap_or(1);
+            let (_, msgr) = LuaPool::build(pool_number, path)?;
             lua_msgr = Some(msgr);
         }
 
