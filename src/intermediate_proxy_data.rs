@@ -77,10 +77,10 @@ impl UserData for ProxyRequest {
             req.method = method;
             Ok(())
         });
-        methods.add_method_mut("set_body", |_, req, (body,)| {
-            req.body = body;
+        methods.add_method_mut("set_body", |_, req, (body,): (String,)| {
             req.headers
-                .insert("Content-Length".to_string(), format!("{}", req.body.len()));
+                .insert("content-length".to_string(), body.len().to_string());
+            req.body = body;
             Ok(())
         });
         methods.add_method_mut("set_header", |_, req, (key, value)| {
@@ -103,10 +103,10 @@ impl UserData for ProxyResponse {
         methods.add_method("headers", |_, res, ()| Ok(res.headers.clone()));
         methods.add_method("status", |_, res, ()| Ok(res.status));
 
-        methods.add_method_mut("set_body", |_, res, (body,)| {
-            res.body = body;
+        methods.add_method_mut("set_body", |_, res, (body,): (String,)| {
             res.headers
-                .insert("Content-Length".to_string(), format!("{}", res.body.len()));
+                .insert("content-length".to_string(), body.len().to_string());
+            res.body = body;
             Ok(())
         });
         methods.add_method_mut("set_status", |_, res, (status,)| {
