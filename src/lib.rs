@@ -21,12 +21,12 @@ pub struct Args {
     filter_script: Option<PathBuf>,
 
     /// Address to bind to.
-    #[arg(short, long, value_name = "ip:port")]
-    address: Option<String>,
+    #[arg(short, long, value_name = "ip:port", default_value = "localhost:9001")]
+    address: String,
 
-    /// Number of Proxy pools to spwan. By default it's 1.
-    #[arg(short, long, value_name = "pool number")]
-    pool_number: Option<usize>,
+    /// Number of Proxy pools to spwan.
+    #[arg(short, long, value_name = "pool number", default_value = "1")]
+    pool_number: usize,
 
     /// Verbosity. if turned on shows the request and response as they are
     /// happening for `http` requests.
@@ -44,11 +44,11 @@ impl Proxy {
     }
 
     async fn run(self) -> anyhow::Result<()> {
-        let address = self.args.address.unwrap_or("127.0.0.1:9001".to_string());
+        let address = self.args.address;
         let mut lua_msgr = None;
 
         if let Some(path) = self.args.filter_script {
-            let pool_number = self.args.pool_number.unwrap_or(1);
+            let pool_number = self.args.pool_number;
             let (_, msgr) = LuaPool::build(pool_number, path)?;
             lua_msgr = Some(msgr);
         }
