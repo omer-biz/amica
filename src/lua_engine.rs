@@ -209,8 +209,8 @@ mod tests {
     async fn test_lua_engine() {
         let capacity = 12;
 
-        let (_, msgr) =
-            LuaPool::build(capacity, PathBuf::from("./filter.lua")).expect("LuaPool build failed");
+        let (_, msgr) = LuaPool::build(capacity, PathBuf::from("lua_test/filter.lua"))
+            .expect("LuaPool build failed");
 
         let mut handles = Vec::with_capacity(capacity);
 
