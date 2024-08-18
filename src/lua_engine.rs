@@ -168,6 +168,8 @@ impl Worker {
             while let Some(msg) = reciver.lock().await.recv().await {
                 let new_tstamp = fs::metadata(&lua_script_path).await?.accessed()?;
 
+                // TODO: hot reload not on demand, but when the file changes.
+                // hint: usge select!.
                 if new_tstamp > old_tstamp {
                     let buf = read_to_string(&lua_script_path).await?;
                     lua_engine.load(&buf)?;
