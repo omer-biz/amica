@@ -1,4 +1,4 @@
-name: Rust
+name: "Rust CI"
 
 on:
   push:
@@ -20,3 +20,21 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+
+  typos-cli:
+    name: typos
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch Repository
+        # ensuring the codebases is avalable to the workflow
+        uses: actions/checkout@v4
+
+      - name: Install Typos
+        uses: taiki-e/install-action@v2
+        with:
+          tool: typos-cli
+
+      - name: Run typos
+        run: typos
+
