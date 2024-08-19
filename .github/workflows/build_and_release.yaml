@@ -121,7 +121,7 @@ jobs:
 
   run-ci:
     needs: validate-input
-    uses: ./.github/workflows/rust.yml
+    uses: ./.github/workflows/rust.yaml
 
   cargo-semver-checks:
     needs: [get-version, run-ci]
