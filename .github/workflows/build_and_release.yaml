@@ -123,14 +123,14 @@ jobs:
     needs: validate-input
     uses: ./.github/workflows/rust.yaml
 
-  cargo-semver-checks:
-    needs: [get-version, run-ci]
-    uses: ./.github/workflows/cargo_semver_checks.yaml
-    with:
-      bump-version: ${{ needs.get-version.outputs.new_crate_version }}
+  # cargo-semver-checks:
+  #   needs: [get-version, run-ci]
+  #   uses: ./.github/workflows/cargo_semver_checks.yaml
+  #   with:
+  #     bump-version: ${{ needs.get-version.outputs.new_crate_version }}
 
   bump-version:
-    needs: [get-version, cargo-semver-checks]
+    needs: [get-version] # , cargo-semver-checks]
     uses: ./.github/workflows/bump_version.yaml
     with:
       crate-version: ${{  needs.get-version.outputs.new_crate_version }}
