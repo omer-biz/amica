@@ -138,7 +138,7 @@ struct Worker {
 
 impl Worker {
     fn build(
-        reciver: Arc<Mutex<mpsc::UnboundedReceiver<ProxyData>>>,
+        receiver: Arc<Mutex<mpsc::UnboundedReceiver<ProxyData>>>,
         lua_script_path: PathBuf,
     ) -> anyhow::Result<Worker> {
         let thread = tokio::spawn(async move {
@@ -165,7 +165,7 @@ impl Worker {
                 };
             }
 
-            while let Some(msg) = reciver.lock().await.recv().await {
+            while let Some(msg) = receiver.lock().await.recv().await {
                 let new_tstamp = fs::metadata(&lua_script_path).await?.accessed()?;
 
                 // TODO: hot reload not on demand, but when the file changes.

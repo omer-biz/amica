@@ -15,7 +15,7 @@ use lua_engine::{LuaPool, Messenger};
 
 #[derive(Parser)]
 pub struct Args {
-    /// Optinal lua script to run on the the intermediate
+    /// Optional lua script to run on the the intermediate
     /// request and response.
     #[arg(short, long, value_name = "lua script")]
     filter_script: Option<PathBuf>,
@@ -24,7 +24,7 @@ pub struct Args {
     #[arg(short, long, value_name = "ip:port", default_value = "localhost:9001")]
     address: String,
 
-    /// Number of Proxy pools to spwan.
+    /// Number of Proxy pools to spawn.
     #[arg(short, long, value_name = "pool number", default_value = "1")]
     pool_number: usize,
 

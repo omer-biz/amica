@@ -6,7 +6,7 @@ This, by no means, is production ready, and it is under heavy development.
 ## Introduction
 
 The simple idea behind the proxy is to kind of act as a middle man, which can
-inspect and change the `Reuest` from the `client` and the `Response` from the
+inspect and change the `Request` from the `client` and the `Response` from the
 `server`.
 
 ### Run
@@ -25,16 +25,16 @@ cargo run -- --help
 Usage: amica [OPTIONS]
 
 Options:
-  -f, --filter-script <lua script>  Optinal lua script to run on the the intermediate request and response
+  -f, --filter-script <lua script>  Optional lua script to run on the the intermediate request and response
   -a, --address <ip:port>           Address to bind to
-  -p, --pool-number <pool number>   Number of Proxy pools to spwan. By default it's 1
+  -p, --pool-number <pool number>   Number of Proxy pools to spawn. By default it's 1
   -v, --verbose                     Verbosity. if turned on shows the request and response as they are happening for `http` requests
   -h, --help                        Print help
 ```
 
 ### Lua API
 
-The `lua` file must contain two functions with exactly the following signiture
+The `lua` file must contain two functions with exactly the following signature
 
 ```lua
 function on_http_request(req)
