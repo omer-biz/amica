@@ -135,6 +135,12 @@ jobs:
     with:
       crate-version: ${{  needs.get-version.outputs.new_crate_version }}
 
+  update-attributions:
+    needs: [get-version, bump-version]
+    uses: ./.github/workflows/cargo_attribution.yaml
+    with:
+      commit_message: ${{ needs.get-version.outputs.new_crate_version }}
+
   create-tag:
     needs: [get-version, update-attributions]
     runs-on: ubuntu-latest
