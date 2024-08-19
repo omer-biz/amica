@@ -1,0 +1,834 @@
+[[dependencies]]
+name = "anyhow"
+version = "1.0.69"
+description = "Flexible concrete Error type built on std::error::Error"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/anyhow"
+
+[[dependencies]]
+name = "autocfg"
+version = "1.1.0"
+description = "Automatic cfg for Rust compiler features"
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2018 Josh Stone"]
+authors = ["Josh Stone <cuviper@gmail.com>"]
+repository = "https://github.com/cuviper/autocfg"
+
+[[dependencies]]
+name = "bitflags"
+version = "1.3.2"
+description = """
+A macro to generate structures which behave like bitflags.
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/bitflags/bitflags"
+
+[[dependencies]]
+name = "bstr"
+version = "0.2.17"
+description = "A string type that is not required to be valid UTF-8."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018-2019 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/bstr"
+
+[[dependencies]]
+name = "bytes"
+version = "1.4.0"
+description = "Types and traits for working with bytes"
+license = "MIT"
+notices = ["Copyright (c) 2018 Carl Lerche"]
+authors = [
+  "Carl Lerche <me@carllerche.com>",
+  "Sean McArthur <sean@seanmonstar.com>",
+]
+repository = "https://github.com/tokio-rs/bytes"
+
+[[dependencies]]
+name = "cc"
+version = "1.0.79"
+description = """
+A build-time dependency for Cargo build scripts to assist in invoking the native
+C compiler to compile native C code into a static archive to be linked into Rust
+code.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/rust-lang/cc-rs"
+
+[[dependencies]]
+name = "cfg-if"
+version = "1.0.0"
+description = """
+A macro to ergonomically define an item depending on a large number of #[cfg]
+parameters. Structured like an if-else chain, the first matching branch is the
+item that gets emitted.
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/alexcrichton/cfg-if"
+
+[[dependencies]]
+name = "clap"
+version = "4.1.8"
+description = "A simple to use, efficient, and full-featured Command Line Argument Parser"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015-2022 Kevin B. Knapp and Clap Contributors"]
+repository = "https://github.com/clap-rs/clap"
+
+[[dependencies]]
+name = "clap_derive"
+version = "4.1.8"
+description = "Parse command line argument by defining a struct, derive crate."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015-2022 Kevin B. Knapp and Clap Contributors"]
+repository = "https://github.com/clap-rs/clap/tree/master/clap_derive"
+
+[[dependencies]]
+name = "clap_lex"
+version = "0.3.2"
+description = "Minimal, flexible command line parser"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015-2022 Kevin B. Knapp and Clap Contributors"]
+repository = "https://github.com/clap-rs/clap/tree/master/clap_lex"
+
+[[dependencies]]
+name = "errno"
+version = "0.2.8"
+description = "Cross-platform interface to the `errno` variable."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 Chris Wong"]
+authors = ["Chris Wong <lambda.fairy@gmail.com>"]
+repository = "https://github.com/lambda-fairy/rust-errno"
+
+[[dependencies]]
+name = "errno-dragonfly"
+version = "0.1.2"
+description = "Exposes errno functionality to stable Rust on DragonFlyBSD"
+license = "MIT"
+notices = ["Copyright (c) 2017 Michael Neumann"]
+authors = ["Michael Neumann <mneumann@ntecs.de>"]
+repository = "https://github.com/mneumann/errno-dragonfly-rs"
+
+[[dependencies]]
+name = "fnv"
+version = "1.0.7"
+description = "Fowler–Noll–Vo hash function"
+license = "Apache-2.0 / MIT"
+notices = ["Copyright (c) 2017 Contributors"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/servo/rust-fnv"
+
+[[dependencies]]
+name = "futures-channel"
+version = "0.3.26"
+description = """
+Channels for asynchronous communication using futures-rs.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-core"
+version = "0.3.26"
+description = """
+The core traits and types in for the `futures` library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-sink"
+version = "0.3.26"
+description = """
+The asynchronous `Sink` trait for the futures-rs library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-task"
+version = "0.3.26"
+description = """
+Tools for working with tasks.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-util"
+version = "0.3.26"
+description = """
+Common utilities and extension traits for the futures-rs library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "h2"
+version = "0.3.16"
+description = "An HTTP/2 client and server"
+license = "MIT"
+notices = ["Copyright (c) 2017 h2 authors"]
+authors = [
+  "Carl Lerche <me@carllerche.com>",
+  "Sean McArthur <sean@seanmonstar.com>",
+]
+repository = "https://github.com/hyperium/h2"
+
+[[dependencies]]
+name = "hashbrown"
+version = "0.12.3"
+description = "A Rust port of Google's SwissTable hash map"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 Amanieu d'Antras"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/rust-lang/hashbrown"
+
+[[dependencies]]
+name = "heck"
+version = "0.4.1"
+description = "heck is a case conversion library."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 The Rust Project Developers"]
+authors = ["Without Boats <woboats@gmail.com>"]
+repository = "https://github.com/withoutboats/heck"
+
+[[dependencies]]
+name = "hermit-abi"
+version = "0.2.6"
+description = """
+hermit-abi is small interface to call functions from the unikernel RustyHermit.
+It is used to build the target `x86_64-unknown-hermit`.
+"""
+license = "MIT/Apache-2.0"
+authors = ["Stefan Lankes"]
+repository = "https://github.com/hermitcore/rusty-hermit"
+
+[[dependencies]]
+name = "hermit-abi"
+version = "0.3.1"
+description = "Hermit system calls definitions."
+license = "MIT OR Apache-2.0"
+authors = ["Stefan Lankes"]
+repository = "https://github.com/hermitcore/rusty-hermit"
+
+[[dependencies]]
+name = "http"
+version = "0.2.9"
+description = """
+A set of types for representing HTTP requests and responses.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2017 http-rs authors",
+  "Copyright 2017 http-rs authors",
+]
+authors = [
+  "Alex Crichton <alex@alexcrichton.com>",
+  "Carl Lerche <me@carllerche.com>",
+  "Sean McArthur <sean@seanmonstar.com>",
+]
+repository = "https://github.com/hyperium/http"
+
+[[dependencies]]
+name = "http-body"
+version = "0.4.5"
+description = """
+Trait representing an asynchronous, streaming, HTTP request or response body.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Hyper Contributors"]
+authors = [
+  "Carl Lerche <me@carllerche.com>",
+  "Lucio Franco <luciofranco14@gmail.com>",
+  "Sean McArthur <sean@seanmonstar.com>",
+]
+repository = "https://github.com/hyperium/http-body"
+
+[[dependencies]]
+name = "httparse"
+version = "1.8.0"
+description = "A tiny, safe, speedy, zero-copy HTTP/1.x parser."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2015-2021 Sean McArthur"]
+authors = ["Sean McArthur <sean@seanmonstar.com>"]
+repository = "https://github.com/seanmonstar/httparse"
+
+[[dependencies]]
+name = "httpdate"
+version = "1.0.2"
+description = "HTTP date parsing and formatting"
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2016 Pyfisch"]
+authors = ["Pyfisch <pyfisch@posteo.org>"]
+repository = "https://github.com/pyfisch/httpdate"
+
+[[dependencies]]
+name = "hyper"
+version = "0.14.24"
+description = "A fast and correct HTTP library."
+license = "MIT"
+notices = ["Copyright (c) 2014-2021 Sean McArthur"]
+authors = ["Sean McArthur <sean@seanmonstar.com>"]
+repository = "https://github.com/hyperium/hyper"
+homepage = "https://hyper.rs"
+
+[[dependencies]]
+name = "indexmap"
+version = "1.9.2"
+description = "A hash table with consistent order and fast iteration."
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2016--2017"]
+repository = "https://github.com/bluss/indexmap"
+
+[[dependencies]]
+name = "io-lifetimes"
+version = "1.0.6"
+description = "A low-level I/O ownership and borrowing library"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = ["Dan Gohman <dev@sunfishcode.online>"]
+repository = "https://github.com/sunfishcode/io-lifetimes"
+
+[[dependencies]]
+name = "is-terminal"
+version = "0.4.4"
+description = "Test whether a given stream is a terminal"
+license = "MIT"
+notices = ["Copyright (c) 2015-2019 Doug Tangren"]
+authors = [
+  "softprops <d.tangren@gmail.com>",
+  "Dan Gohman <dev@sunfishcode.online>",
+]
+repository = "https://github.com/sunfishcode/is-terminal"
+
+[[dependencies]]
+name = "itoa"
+version = "1.0.6"
+description = "Fast integer primitive to string conversion"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/itoa"
+
+[[dependencies]]
+name = "libc"
+version = "0.2.139"
+description = """
+Raw FFI bindings to platform libraries like libc.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014-2020 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/libc"
+
+[[dependencies]]
+name = "linux-raw-sys"
+version = "0.1.4"
+description = "Generated bindings for Linux's userspace API"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = ["Dan Gohman <dev@sunfishcode.online>"]
+repository = "https://github.com/sunfishcode/linux-raw-sys"
+
+[[dependencies]]
+name = "log"
+version = "0.4.17"
+description = """
+A lightweight logging facade for Rust
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/log"
+
+[[dependencies]]
+name = "memchr"
+version = "2.5.0"
+description = "Safe interface to memchr."
+license = "Unlicense/MIT"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>", "bluss"]
+repository = "https://github.com/BurntSushi/memchr"
+
+[[dependencies]]
+name = "mio"
+version = "0.8.6"
+description = "Lightweight non-blocking I/O."
+license = "MIT"
+notices = ["Copyright (c) 2014 Carl Lerche and other MIO contributors"]
+authors = [
+  "Carl Lerche <me@carllerche.com>",
+  "Thomas de Zeeuw <thomasdezeeuw@gmail.com>",
+  "Tokio Contributors <team@tokio.rs>",
+]
+repository = "https://github.com/tokio-rs/mio"
+
+[[dependencies]]
+name = "num-traits"
+version = "0.2.15"
+description = "Numeric traits for generic mathematics"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-num/num-traits"
+
+[[dependencies]]
+name = "num_cpus"
+version = "1.15.0"
+description = "Get the number of CPUs on a machine."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015"]
+authors = ["Sean McArthur <sean@seanmonstar.com>"]
+repository = "https://github.com/seanmonstar/num_cpus"
+
+[[dependencies]]
+name = "once_cell"
+version = "1.17.1"
+description = "Single assignment cells and lazy values."
+license = "MIT OR Apache-2.0"
+authors = ["Aleksey Kladov <aleksey.kladov@gmail.com>"]
+repository = "https://github.com/matklad/once_cell"
+
+[[dependencies]]
+name = "os_str_bytes"
+version = "6.4.1"
+description = """
+Convert between byte sequences and platform-native strings
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2019 dylni (https://github.com/dylni)"]
+authors = ["dylni"]
+repository = "https://github.com/dylni/os_str_bytes"
+
+[[dependencies]]
+name = "pin-project-lite"
+version = "0.2.9"
+description = """
+A lightweight version of pin-project written with declarative macros.
+"""
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/taiki-e/pin-project-lite"
+
+[[dependencies]]
+name = "pin-utils"
+version = "0.1.0"
+description = """
+Utilities for pinning
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2018 The pin-utils authors",
+  "Copyright 2018 The pin-utils authors",
+]
+authors = ["Josef Brandl <mail@josefbrandl.de>"]
+repository = "https://github.com/rust-lang-nursery/pin-utils"
+
+[[dependencies]]
+name = "pkg-config"
+version = "0.3.26"
+description = """
+A library to run the pkg-config system tool at build time in order to be used in
+Cargo build scripts.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/rust-lang/pkg-config-rs"
+
+[[dependencies]]
+name = "proc-macro-error"
+version = "1.0.4"
+description = "Almost drop-in replacement to panics in proc-macros"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2019-2020 CreepySkeleton",
+  "Copyright 2019-2020 CreepySkeleton <creepy-skeleton@yandex.ru>",
+]
+authors = ["CreepySkeleton <creepy-skeleton@yandex.ru>"]
+repository = "https://gitlab.com/CreepySkeleton/proc-macro-error"
+
+[[dependencies]]
+name = "proc-macro-error-attr"
+version = "1.0.4"
+description = "Attribute macro for proc-macro-error crate"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2019-2020 CreepySkeleton",
+  "Copyright 2019-2020 CreepySkeleton <creepy-skeleton@yandex.ru>",
+]
+authors = ["CreepySkeleton <creepy-skeleton@yandex.ru>"]
+repository = "https://gitlab.com/CreepySkeleton/proc-macro-error"
+
+[[dependencies]]
+name = "proc-macro2"
+version = "1.0.51"
+description = "A substitute implementation of the compiler's `proc_macro` API to decouple token-based libraries from the procedural macro use case."
+license = "MIT OR Apache-2.0"
+authors = [
+  "David Tolnay <dtolnay@gmail.com>",
+  "Alex Crichton <alex@alexcrichton.com>",
+]
+repository = "https://github.com/dtolnay/proc-macro2"
+
+[[dependencies]]
+name = "quote"
+version = "1.0.23"
+description = "Quasi-quoting macro quote!(...)"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/quote"
+
+[[dependencies]]
+name = "rlua"
+version = "0.19.4"
+description = "High level bindings to Lua 5.x"
+license = "MIT"
+notices = ["Copyright (c) 2017", "Copyright © 1994–2017 Lua.org, PUC-Rio."]
+authors = ["kyren <kerriganw@gmail.com>"]
+repository = "https://github.com/amethyst/rlua"
+
+[[dependencies]]
+name = "rlua-lua54-sys"
+version = "0.1.3"
+description = "Bindings to lua's C API"
+license = "MIT"
+repository = "https://github.com/amethyst/rlua"
+
+[[dependencies]]
+name = "rustix"
+version = "0.36.9"
+description = "Safe Rust bindings to POSIX/Unix/Linux/Winsock2-like syscalls"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = [
+  "Dan Gohman <dev@sunfishcode.online>",
+  "Jakub Konka <kubkon@jakubkonka.com>",
+]
+repository = "https://github.com/bytecodealliance/rustix"
+
+[[dependencies]]
+name = "slab"
+version = "0.4.8"
+description = "Pre-allocated storage for a uniform data type"
+license = "MIT"
+notices = ["Copyright (c) 2019 Carl Lerche"]
+authors = ["Carl Lerche <me@carllerche.com>"]
+repository = "https://github.com/tokio-rs/slab"
+
+[[dependencies]]
+name = "socket2"
+version = "0.4.9"
+description = """
+Utilities for handling networking sockets with a maximal amount of configuration
+possible intended.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = [
+  "Alex Crichton <alex@alexcrichton.com>",
+  "Thomas de Zeeuw <thomasdezeeuw@gmail.com>",
+]
+repository = "https://github.com/rust-lang/socket2"
+
+[[dependencies]]
+name = "strsim"
+version = "0.10.0"
+description = """
+Implementations of string similarity metrics. Includes Hamming, Levenshtein,
+OSA, Damerau-Levenshtein, Jaro, Jaro-Winkler, and Sørensen-Dice.
+"""
+license = "MIT"
+notices = [
+  "Copyright (c) 2015 Danny Guo",
+  "Copyright (c) 2016 Titus Wormer <tituswormer@gmail.com>",
+  "Copyright (c) 2018 Akash Kurdekar",
+]
+authors = ["Danny Guo <danny@dannyguo.com>"]
+repository = "https://github.com/dguo/strsim-rs"
+
+[[dependencies]]
+name = "syn"
+version = "1.0.109"
+description = "Parser for Rust source code"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/syn"
+
+[[dependencies]]
+name = "termcolor"
+version = "1.2.0"
+description = """
+A simple cross platform library for writing colored text to a terminal.
+"""
+license = "Unlicense OR MIT"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/termcolor"
+
+[[dependencies]]
+name = "tokio"
+version = "1.26.0"
+description = """
+An event-driven, non-blocking I/O platform for writing asynchronous I/O
+backed applications.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2023 Tokio Contributors"]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tokio"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tokio-macros"
+version = "1.8.2"
+description = """
+Tokio's proc macros.
+"""
+license = "MIT"
+notices = [
+  "Copyright (c) 2019 Yoshua Wuyts",
+  "Copyright (c) 2022 Tokio Contributors",
+]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tokio"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tokio-util"
+version = "0.7.7"
+description = """
+Additional utilities for working with Tokio.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2023 Tokio Contributors"]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tokio"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tower-service"
+version = "0.3.2"
+description = """
+Trait representing an asynchronous, request / response based, client or server.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tower Contributors"]
+authors = ["Tower Maintainers <team@tower-rs.com>"]
+repository = "https://github.com/tower-rs/tower"
+
+[[dependencies]]
+name = "tracing"
+version = "0.1.37"
+description = """
+Application-level tracing for Rust.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = [
+  "Eliza Weisman <eliza@buoyant.io>",
+  "Tokio Contributors <team@tokio.rs>",
+]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tracing-core"
+version = "0.1.30"
+description = """
+Core primitives for application-level tracing.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "try-lock"
+version = "0.2.4"
+description = "A lightweight atomic lock."
+license = "MIT"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2018 Sean McArthur",
+]
+authors = ["Sean McArthur <sean@seanmonstar.com>"]
+repository = "https://github.com/seanmonstar/try-lock"
+
+[[dependencies]]
+name = "unicode-ident"
+version = "1.0.7"
+description = "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31"
+license = "(MIT OR Apache-2.0) AND Unicode-DFS-2016"
+notices = ["Copyright © 1991-2022 Unicode, Inc. All rights reserved."]
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/unicode-ident"
+
+[[dependencies]]
+name = "version_check"
+version = "0.9.4"
+description = "Tiny crate to check the version of the installed/running rustc."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2017-2018 Sergio Benitez"]
+authors = ["Sergio Benitez <sb@sergio.bz>"]
+repository = "https://github.com/SergioBenitez/version_check"
+
+[[dependencies]]
+name = "want"
+version = "0.3.0"
+description = "Detect when another Future wants a result."
+license = "MIT"
+notices = ["Copyright (c) 2018-2019 Sean McArthur"]
+authors = ["Sean McArthur <sean@seanmonstar.com>"]
+repository = "https://github.com/seanmonstar/want"
+
+[[dependencies]]
+name = "wasi"
+version = "0.11.0+wasi-snapshot-preview1"
+description = "Experimental WASI API bindings for Rust"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = ["The Cranelift Project Developers"]
+repository = "https://github.com/bytecodealliance/wasi"
+
+[[dependencies]]
+name = "winapi"
+version = "0.3.9"
+description = "Raw FFI bindings for all of Windows API."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2015-2018 The winapi-rs Developers"]
+authors = ["Peter Atashian <retep998@gmail.com>"]
+repository = "https://github.com/retep998/winapi-rs"
+
+[[dependencies]]
+name = "winapi-i686-pc-windows-gnu"
+version = "0.4.0"
+description = "Import libraries for the i686-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead."
+license = "MIT/Apache-2.0"
+authors = ["Peter Atashian <retep998@gmail.com>"]
+repository = "https://github.com/retep998/winapi-rs"
+
+[[dependencies]]
+name = "winapi-util"
+version = "0.1.5"
+description = "A dumping ground for high level safe wrappers over winapi."
+license = "Unlicense/MIT"
+notices = ["Copyright (c) 2017 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/winapi-util"
+
+[[dependencies]]
+name = "winapi-x86_64-pc-windows-gnu"
+version = "0.4.0"
+description = "Import libraries for the x86_64-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead."
+license = "MIT/Apache-2.0"
+authors = ["Peter Atashian <retep998@gmail.com>"]
+repository = "https://github.com/retep998/winapi-rs"
+
+[[dependencies]]
+name = "windows-sys"
+version = "0.45.0"
+description = "Rust for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows-targets"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_aarch64_gnullvm"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_aarch64_msvc"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_i686_gnu"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_i686_msvc"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_x86_64_gnu"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_x86_64_gnullvm"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_x86_64_msvc"
+version = "0.42.1"
+description = "Code gen support for the windows crate"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
